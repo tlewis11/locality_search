@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env ruby 
 require 'optparse'
 require 'json'
 
@@ -8,7 +8,7 @@ require 'json'
 def file_to_array(filepath)
     #reads the contents of the file into an array, resulting array
     #contains all words in document in order
-   
+    
     contents = IO.readlines(filepath).map{|line| line.split()}
     words = contents.flatten
     return words
@@ -55,11 +55,11 @@ end
 
 #=====================================================================
 
-def find_matching_docs_in_directory(term_one, term_two, directory=".", locality_factor=2)
+def find_matching_docs_in_directory(term_one, term_two, directory, locality_factor=2)
 
     #selects all files in the given directory, then filters by 
-
-    all_files = Dir.entries(directory).select{|entry| File.file?(entry)}
+    all_files = Dir.entries(directory).select{|entry| File.file?(entry)}.map{|filename| File.join(directory, filename)}
+    all_files = Dir.entries(directory).map{|filename| File.join(directory, filename)}.select{|entry| File.file?(entry)}
 
     matched_files = all_files.select{|filename| searchDocument(filename, term_one, term_two, locality_factor)}
 
@@ -70,40 +70,67 @@ end
 #=====================================================================
 
 
+def get_args
+    args = {directory: '.', case_sensitive: false }
+    optparse = OptionParser.new do |opts|
 
+        opts.banner = "Usage: locality_search.rb [options] TERMONE TERMTWO"
 
-options = {}
+        #===========================
 
-OptionParser.new do |opts|
+        opts.on("-d", "--directory [DIR]", "directory to search") do |d|
+            args[:directory] = d
+        end
 
-  opts.on("-d", "--directory [DIR]", "directory to search") do |d|
-    options[:directory] = d
-  end
-end.parse!
+        #===========================
 
-usage = "Usage: locality_search.rb [options] TERMONE TERMTWO"
+        opts.on("-c", "--case-sensitive", "only match search terms with exact case given. Case is ignored by default.") do |d|
+            args[:case_sensitive] = true
+        end
 
-if ARGV.length != 2
-    abort(usage)
-end 
+        #===========================
 
-term_one = ARGV[0]
-term_two = ARGV[1]
+        opts.on("-t", "--test", "Perform unit tests.  Exits after tests are complete.") do |d|
+            require 'minitest/autorun'
+            require './test'
+            exit
+        end
+        
+        #===========================
+        opts.on("-h", "--help", "print this help message") do |d|
+            puts opts
+            exit
+        end
+        #===========================
+    
 
-if options[:directory].nil?
-    directory_to_search = '.'
-else
-    directory_to_search = options[:directory]
+    end
+    optparse.parse!
+    return args
 end
+#=====================================================================
 
-if not File.directory?(directory_to_search)
-    abort("#{options[:directory]} is not a directory")
+
+def do_main
+    #parse args, do search or run tests according to options given
+
+    args = get_args()
+    puts args
+    puts args[:directory]
+    if ARGV.length != 2
+        puts $optparse
+        puts 'here' 
+        exit(-1)
+    end 
+
+    term_one, term_two = ARGV[0], ARGV[1]
+ 
+    if not File.directory?(args[:directory])
+        abort("#{args[:directory]} is not a directory")
+    end
+    
+    puts JSON.pretty_generate(find_matching_docs_in_directory(term_one, term_two, args[:directory]))
 end
+#=====================================================================
 
-if options[:test]
-    require 'minitest/autorun'
-    require './test'
-end
-
-puts JSON.pretty_generate(find_matching_docs_in_directory(term_one, term_two))
-
+do_main()
