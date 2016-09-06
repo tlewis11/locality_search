@@ -1,6 +1,11 @@
 Locality searcher implemented in Ruby.  This is a command line utility to search a document for
 two terms and determine whether the two terms appear in the document within a certain distance from each other. Given a directory, the locality searcher will output a list of the documents that meet the criterion of having the two given terms within the given distance.
 
+Dependencies:
+1. Ruby standard library
+2. locality_search.rb must be executable
+3. /usr/bin/env ruby must be set
+
 Install and Use:
 
 1. git clone https://github.com/tlewis11/locality_search
@@ -14,3 +19,10 @@ Usage: locality_search.rb [options] TERMONE TERMTWO
     -l, --locality-factor [N]        The distance within which the terms must appear.  Default is 2
     -t, --test                       Perform unit tests.  Exits after tests are complete.
     -h, --help                       print this help message
+
+Tested on:
+    
+    OSX 10.11.3 (El Capitan)
+    ruby 2.0.0p645
+
+
