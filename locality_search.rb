@@ -58,7 +58,6 @@ end
 def find_matching_docs_in_directory(term_one, term_two, directory, locality_factor=2)
 
     #selects all files in the given directory, then filters by 
-    all_files = Dir.entries(directory).select{|entry| File.file?(entry)}.map{|filename| File.join(directory, filename)}
     all_files = Dir.entries(directory).map{|filename| File.join(directory, filename)}.select{|entry| File.file?(entry)}
 
     matched_files = all_files.select{|filename| searchDocument(filename, term_one, term_two, locality_factor)}
@@ -71,21 +70,23 @@ end
 
 
 def get_args
-    args = {directory: '.', case_sensitive: false }
+    args = {directory: '.', locality_factor: 2}
     optparse = OptionParser.new do |opts|
 
         opts.banner = "Usage: locality_search.rb [options] TERMONE TERMTWO"
 
         #===========================
 
-        opts.on("-d", "--directory [DIR]", "directory to search") do |d|
+        opts.on("-d", "--directory [DIR]", "directory to search. Default to current dir .") do |d|
+            if not File.directory?(d)
+                abort("#{d} is not a directory")
+            end
             args[:directory] = d
         end
 
-        #===========================
-
-        opts.on("-c", "--case-sensitive", "only match search terms with exact case given. Case is ignored by default.") do |d|
-            args[:case_sensitive] = true
+        opts.on("-l",  "--locality-factor [N]", Float, "The distance within which the terms must appear.  Default is 2") do |n|
+            
+            args[:locality_factor] = n
         end
 
         #===========================
@@ -124,12 +125,8 @@ def do_main
     end 
 
     term_one, term_two = ARGV[0], ARGV[1]
- 
-    if not File.directory?(args[:directory])
-        abort("#{args[:directory]} is not a directory")
-    end
     
-    puts JSON.pretty_generate(find_matching_docs_in_directory(term_one, term_two, args[:directory]))
+    puts JSON.pretty_generate(find_matching_docs_in_directory(term_one, term_two, args[:directory], args[:locality_factor]))
 end
 #=====================================================================
 

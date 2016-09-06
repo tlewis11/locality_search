@@ -20,7 +20,7 @@ class LocalitySearchTests < Minitest::Unit::TestCase
     end
 
     def test_mutliline_document  
-        result_bool = searchDocument @multiline_document, @search_term_one, @search_term_two
+        result_bool = searchDocument @multiline_document, @search_term_one, @search_term_two, 3
         assert(result_bool)
     end
 
