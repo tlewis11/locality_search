@@ -70,6 +70,8 @@ end
 
 
 def get_args
+
+
     args = {directory: '.', locality_factor: 2}
     optparse = OptionParser.new do |opts|
 
@@ -107,6 +109,11 @@ def get_args
 
     end
     optparse.parse!
+
+    if ARGV.length != 2
+        abort("Usage: locality_search.rb [options] TERMONE TERMTWO")
+    end 
+
     return args
 end
 #=====================================================================
@@ -116,13 +123,7 @@ def do_main
     #parse args, do search or run tests according to options given
 
     args = get_args()
-    puts args
-    puts args[:directory]
-    if ARGV.length != 2
-        puts $optparse
-        puts 'here' 
-        exit(-1)
-    end 
+
 
     term_one, term_two = ARGV[0], ARGV[1]
     
